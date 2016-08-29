@@ -24,7 +24,8 @@ $btn_scan.addEventListener('click', function(){
   .then(value => {
     let batteryLevel = value.getUint8(0);
     console.log('> Battery Level is ' + batteryLevel + '%');
-    $console.innerHTML = '電池残量は' + batteryLevel + '%！！！'
+    $console.innerHTML = '電池残量は' + batteryLevel + '%！！！';
+    console.log(navigator.bluetooth);
   })
   .catch(error => {
     console.log('Argh! ' + error);
