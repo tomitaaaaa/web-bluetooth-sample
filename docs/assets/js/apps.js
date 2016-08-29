@@ -2,35 +2,30 @@ var $btn_scan = document.getElementById('scan_device'),
     $console = document.getElementById('console');
 
 $btn_scan.addEventListener('click', function(){
-  navigator.bluetooth.requestDevice({
-    filters:[{
-      services: [
-        'link_loss',
-        'immediate_alert',
-        'tx_power'
-      ]
-    }]
-  })
-    .then(device =>{
+  console.log('Requesting Bluetooth Device...');
+  navigator.bluetooth.requestDevice(
+    {filters: [{services: ['battery_service']}]})
+  .then(device => {
+    console.log('Connecting to GATT Server...');
     return device.gatt.connect();
   })
-    .then(server =>{
-    return Promise.all([
-      server.getPrimaryService('link_loss'),
-      server.getPrimaryService('immediate_alert'),
-      server.getPrimaryService('tx_power')
-    ]);
+  .then(server => {
+    console.log('Getting Battery Service...');
+    return server.getPrimaryService('battery_service');
   })
-    .then(services =>{
-    return Promise.all([
-      services[0].getCharacteristic('alert_level'),
-      services[1].getCharacteristic('alert_level'),
-      services[2].getCharacteristic('tx_power_level')
-    ]);
+  .then(service => {
+    console.log('Getting Battery Level Characteristic...');
+    return service.getCharacteristic('battery_level');
   })
-    .then(characteristics =>{
+  .then(characteristic => {
+    console.log('Reading Battery Level...');
+    return characteristic.readValue();
   })
-    .catch(error =>{
-    console.log(error);
+  .then(value => {
+    let batteryLevel = value.getUint8(0);
+    console.log('> Battery Level is ' + batteryLevel + '%');
+  })
+  .catch(error => {
+    console.log('Argh! ' + error);
   });
 });
